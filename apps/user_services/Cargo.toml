@@ -11,7 +11,6 @@ path = "lib.rs"
 actix-web = "4.4"
 actix-rt = "2.9"
 actix-cors = "0.7"
-
 # Async Runtime
 tokio = { version = "1.35", features = ["full"] }
 
@@ -43,6 +42,7 @@ thiserror = "1.0"
 # Utils
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.6", features = ["serde", "v4"] }
+argon2 = "0.5.3"
 
 # Scheduler
 tokio-cron-scheduler = "0.10"

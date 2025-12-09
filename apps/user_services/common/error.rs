@@ -1,8 +1,8 @@
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug,Serialize,Deserialize)]
 pub enum AppError {
     InternalError(String),
     BadRequest(String),
