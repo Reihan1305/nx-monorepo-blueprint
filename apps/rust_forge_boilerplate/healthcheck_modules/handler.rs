@@ -1,6 +1,10 @@
-use crate::healthcheck_modules::dto::{HealthResponse, ReadinessResponse};
+use std::sync::Arc;
+
+use crate::healthcheck_modules::{
+    dto::{HealthResponse, ReadinessResponse},
+    service::{HealthCheckService, HealthCheckServicesTrait},
+};
 use actix_web::{web, HttpResponse};
-use mongodb::Database;
 use redis::aio::ConnectionManager;
 use sqlx::PgPool;
 
@@ -10,46 +14,29 @@ pub async fn health_check() -> HttpResponse {
         service: "rust_forge_boilerplate".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
     };
+
     HttpResponse::Ok().json(response)
 }
 
 pub async fn readiness_check(
+    service: web::Data<Arc<HealthCheckService>>,
     db_pool: web::Data<PgPool>,
     redis_conn: web::Data<ConnectionManager>,
-    mongo_db: web::Data<Database>,
 ) -> HttpResponse {
-    let mut ready = true;
+    let mut redis_clone = redis_conn.as_ref().clone();
 
-    let db_ready = sqlx::query("SELECT 1")
-        .fetch_one(db_pool.get_ref())
-        .await
-        .is_ok();
-    if !db_ready {
-        ready = false;
-    }
+    let db_fut = async { service.ping_db(db_pool.get_ref()).await };
 
-    let mut redis_conn_clone = redis_conn.as_ref().clone();
-    let redis_ready = redis::cmd("PING")
-        .query_async::<_, String>(&mut redis_conn_clone)
-        .await
-        .is_ok();
-    if !redis_ready {
-        ready = false;
-    }
+    let redis_fut = async { service.ping_redis(&mut redis_clone).await };
 
-    let mongo_ready = mongo_db
-        .run_command(mongodb::bson::doc! { "ping": 1 }, None)
-        .await
-        .is_ok();
-    if !mongo_ready {
-        ready = false;
-    }
+    let (db_ready, redis_ready) = tokio::join!(db_fut, redis_fut);
+
+    let ready = db_ready && redis_ready;
 
     let response = ReadinessResponse {
         ready,
         database: db_ready,
         redis: redis_ready,
-        mongodb: mongo_ready,
     };
 
     if ready {
