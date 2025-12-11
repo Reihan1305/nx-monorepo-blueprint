@@ -1,38 +1,38 @@
-use rust_forge_boilerplate::common::{config::AppConfig, infrastructure};
+use rust_forge_boilerplate::common::infrastructure;
 use sqlx::migrate::MigrateDatabase;
+use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().ok();
-
+    
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+            env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let config = AppConfig::new()?;
+    let database_url =
+        env::var("DATABASE_URL").expect("DATABASE_URL environment variable is required");
 
     tracing::info!("Running migrations...");
 
-    // Create database if it doesn't exist
-    if !sqlx::Postgres::database_exists(&config.database.url).await? {
+    if !sqlx::Postgres::database_exists(&database_url).await? {
         tracing::info!("Database does not exist, creating...");
-        sqlx::Postgres::create_database(&config.database.url).await?;
+        sqlx::Postgres::create_database(&database_url).await?;
     }
 
-    // Run migrations
-    let pool = infrastructure::database::create_pool(
-        &config.database.url,
-        config.database.max_connections,
-    )
-    .await?;
+    let database_max_connections: u32 = env::var("DATABASE_MAX_CONNECTIONS")
+        .unwrap_or_else(|_| "10".to_string())
+        .parse()
+        .expect("Invalid DATABASE_MAX_CONNECTIONS");
 
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await?;
+    let pool =
+        infrastructure::database::create_pool(&database_url, database_max_connections).await?;
+
+    sqlx::migrate!("./migrations").run(&pool).await?;
 
     tracing::info!("Migrations completed successfully");
 
