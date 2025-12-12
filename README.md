@@ -1,76 +1,168 @@
-# RustMonorepo
+# NX Monorepo Blueprint
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+A monorepos blueprint powered by [Nx](https://nx.dev) and [@monodon/rust](https://github.com/nrwl/monodon) for efficient development and build management.
 
-Run `npx nx graph` to visually explore what got created. Now, let's get you up to speed!
+## 🚀 Quick Start
 
-## Finish your CI setup
+### Prerequisites
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/MDVfw2dI9q)
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [Rust](https://rustup.rs/) (latest stable)
+- [Cargo](https://doc.rust-lang.org/cargo/) (comes with Rust)
 
+### Installation
 
-## Run tasks
+```bash
+# Install dependencies
+npm install
 
-To run tasks with Nx use:
-
-```sh
-npx nx <target> <project-name>
+# Verify Rust installation
+rustc --version
+cargo --version
 ```
 
-For example:
+## 📁 Project Structure
 
-```sh
-npx nx build myproject
+```
+├── apps/                    # applications
+│   └── rust_forge_boilerplate/  # application
+├── libs/                    # Shared libraries
+│   └── errors/             # Error handling library
+├── tools/                   # Development tools
+│   ├── create-rust-app.js  # App generator script
+│   └── rust_app_template/  # Template for new apps
+└── dist/                   # Build outputs
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🛠️ Development Commands
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Building Projects
 
-## Add new projects
+```bash
+# Build all projects
+npx nx run-many -t build
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+# Build specific project
+npx nx build rust_forge_boilerplate
+npx nx build errors
 
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+# Build with release optimizations
+npx nx build rust_forge_boilerplate --configuration=production
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
+### Testing
 
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
+```bash
+# Run all tests
+npx nx run-many -t test
 
-# Generate a library
-npx nx g @nx/react:lib some-lib
+# Test specific project
+npx nx test rust_forge_boilerplate
+npx nx test errors
+
+# Run tests with coverage
+npx nx test rust_forge_boilerplate --configuration=production
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+### Linting
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Lint all projects
+npx nx run-many -t lint
 
+# Lint specific project
+npx nx lint rust_forge_boilerplate
+```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Running Applications
 
-## Install Nx Console
+```bash
+# Run the main application
+npx nx run rust_forge_boilerplate
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+# Run with release optimizations
+npx nx run rust_forge_boilerplate --configuration=production
+```
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 📦 Creating New Projects
 
-## Useful links
+### Generate a New Rust Library
 
-Learn more:
+```bash
+# Create a new library
+npx nx g @monodon/rust:lib my-new-lib
 
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Create library with specific features
+npx nx g @monodon/rust:lib utils --directory=shared
+```
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Generate a New Rust Application
+
+```bash
+# Use the custom generator script
+npm run create:rust-app
+
+# Or use Nx generator directly
+npx nx g @monodon/rust:app my-new-app
+```
+
+## 🔧 Available Scripts
+
+- `npm run create:rust-app` - Interactive script to create new Rust applications
+
+## 📊 Project Visualization
+
+```bash
+# View project dependency graph
+npx nx graph
+
+# Show affected projects (useful for CI)
+npx nx affected:graph
+```
+
+## 🏗️ Build Targets
+
+Each Rust project supports these targets:
+
+- **build** - Compile the project
+- **test** - Run unit tests
+- **lint** - Run clippy linting
+- **run** - Execute the binary (for applications)
+
+### Configuration Options
+
+- **production** - Optimized release builds with `--release` flag
+
+## 🚀 Deployment
+
+Build outputs are generated in the `dist/target/` directory:
+
+```bash
+# Production builds
+npx nx build rust_forge_boilerplate --configuration=production
+
+# Outputs will be in: dist/target/rust_forge_boilerplate/release/
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **Duplicate project names**: Ensure each project has a unique name in its `project.json`
+2. **Cargo.lock conflicts**: Run `cargo update` in the workspace root
+3. **Build cache issues**: Clear with `npx nx reset`
+
+### Useful Commands
+
+```bash
+# Clear Nx cache
+npx nx reset
+
+# Show project information
+npx nx show project rust_forge_boilerplate
+
+# List all projects
+npx nx show projects
+```
