@@ -1,8 +1,8 @@
 {
-  "name": "rust_forge_boilerplate",
+  "name": "rust_app_template",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/rust_forge_boilerplate/src",
+  "sourceRoot": "tools/rust_app_template/src",
   "targets": {
     "build": {
       "cache": true,
@@ -11,7 +11,7 @@
         "{options.target-dir}"
       ],
       "options": {
-        "target-dir": "dist/target/rust_forge_boilerplate"
+        "target-dir": "dist/target/rust_app_template"
       },
       "configurations": {
         "production": {
@@ -26,7 +26,7 @@
         "{options.target-dir}"
       ],
       "options": {
-        "target-dir": "dist/target/rust_forge_boilerplate"
+        "target-dir": "dist/target/rust_app_template"
       },
       "configurations": {
         "production": {
@@ -41,7 +41,7 @@
         "{options.target-dir}"
       ],
       "options": {
-        "target-dir": "dist/target/rust_forge_boilerplate"
+        "target-dir": "dist/target/rust_app_template"
       }
     },
     "run": {
@@ -50,7 +50,7 @@
         "{options.target-dir}"
       ],
       "options": {
-        "target-dir": "dist/target/rust_forge_boilerplate"
+        "target-dir": "dist/target/rust_app_template"
       },
       "configurations": {
         "production": {

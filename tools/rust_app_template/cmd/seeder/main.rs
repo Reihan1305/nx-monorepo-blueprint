@@ -1,4 +1,4 @@
-use rust_forge_boilerplate::common::infrastructure;
+use rust_apps_boilerplate::common::infrastructure;
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
