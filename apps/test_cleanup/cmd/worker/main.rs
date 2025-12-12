@@ -1,4 +1,4 @@
-use rust_app_template::common::infrastructure::{self, redis::RedisClient};
+use test_cleanup::common::infrastructure::{self, redis::RedisClient};
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 

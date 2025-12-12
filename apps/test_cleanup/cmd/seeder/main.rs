@@ -1,4 +1,4 @@
-use rust_app_template::common::infrastructure;
+use test_cleanup::common::infrastructure;
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 

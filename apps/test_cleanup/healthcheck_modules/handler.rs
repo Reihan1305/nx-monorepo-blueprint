@@ -11,7 +11,7 @@ use sqlx::PgPool;
 pub async fn health_check() -> HttpResponse {
     let response = HealthResponse {
         status: "ok".to_string(),
-        service: "rust_app_template".to_string(),
+        service: "test_cleanup".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
     };
 

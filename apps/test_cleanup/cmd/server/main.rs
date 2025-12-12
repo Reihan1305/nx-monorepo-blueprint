@@ -1,5 +1,5 @@
 use actix_web::{middleware::Logger, App, HttpServer};
-use rust_app_template::{
+use test_cleanup::{
     common::infrastructure::{self, redis::RedisClient},
     healthcheck_modules::{self, repo::HealthCheckRepo},
 };
