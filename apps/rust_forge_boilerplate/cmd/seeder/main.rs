@@ -23,12 +23,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing::info!("Running seeders...");
 
-    // TODO: Add your seeding logic here
-    // Example:
-    // sqlx::query!("INSERT INTO users (name, email) VALUES ($1, $2)", "Admin", "admin@example.com")
-    //     .execute(&db_pool)
-    //     .await?;
-
     tracing::info!("Seeding completed successfully");
 
     Ok(())

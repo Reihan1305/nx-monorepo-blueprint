@@ -1,4 +1,4 @@
-use rust_app_template::common::infrastructure;
+use rust_forge_boilerplate::common::infrastructure;
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -22,12 +22,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _db_pool = infrastructure::database::create_pool(&database_url, database_max_connections).await?;
 
     tracing::info!("Running seeders...");
-
-    // TODO: Add your seeding logic here
-    // Example:
-    // sqlx::query!("INSERT INTO users (name, email) VALUES ($1, $2)", "Admin", "admin@example.com")
-    //     .execute(&db_pool)
-    //     .await?;
 
     tracing::info!("Seeding completed successfully");
 

@@ -4,14 +4,14 @@ use crate::healthcheck_modules::{
     dto::{HealthResponse, ReadinessResponse},
     service::{HealthCheckService, HealthCheckServicesTrait},
 };
-use actix_web::{HttpResponse, web};
+use actix_web::{web, HttpResponse};
 use redis::aio::ConnectionManager;
 use sqlx::PgPool;
 
 pub async fn health_check() -> HttpResponse {
     let response = HealthResponse {
         status: "ok".to_string(),
-        service: "rust_app_template".to_string(),
+        service: "rust_forge_boilerplate".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
     };
 

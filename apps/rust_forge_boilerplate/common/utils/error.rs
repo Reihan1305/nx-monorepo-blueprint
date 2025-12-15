@@ -1,22 +1,12 @@
 use actix_web::{HttpResponse, error::ResponseError, http::StatusCode};
 use serde::Serialize;
-use std::{collections::HashMap, env, fmt, fs, process::exit, sync::OnceLock};
+use std::{collections::HashMap, env, fmt, fs, sync::OnceLock};
 
-#[derive(Debug)]
-pub enum AppError {
-    InternalError(String),
-    BadRequest(String),
-    NotFound(String),
-    Unauthorized(String),
-    ValidationError(String),
-    DatabaseError(String),
-    ServiceUnavailable,
-    ConfigurationError,
-    ExternalServiceError,
-    RateLimitExceeded,
-    InvalidApiKey,
-    MaintenanceMode,
-    CustomError { code: u16, message: String },
+#[derive(Debug, Clone)]
+pub struct AppError {
+    code: u16,
+    message: String,
+    http_code: Option<u16>,
 }
 
 static GLOBAL_ERROR_MESSAGES: OnceLock<HashMap<String, String>> = OnceLock::new();
@@ -32,7 +22,7 @@ fn load_global_error_messages() -> &'static HashMap<String, String> {
             content
         } else {
             tracing::error!("Failed to read global error file: {}", file_path);
-            exit(1)
+            panic!("Failed to read global error file: {}", file_path)
         };
 
         serde_json::from_str(&error_json).unwrap_or_else(|e| {
@@ -52,7 +42,7 @@ fn load_service_error_messages() -> &'static HashMap<String, String> {
             content
         } else {
             tracing::error!("Failed to read service error file: {}", file_path);
-            exit(1)
+            panic!("Failed to read service error file: {}", file_path)
         };
 
         serde_json::from_str(&error_json).unwrap_or_else(|e| {
@@ -80,84 +70,97 @@ struct ErrorResponse {
     message: String,
 }
 
+impl AppError {
+    pub fn new(code: u16, message: Option<String>, http_code: Option<u16>) -> Self {
+        let message = message.unwrap_or_else(|| get_error_message(code, &format!("Error code: {}", code)));
+        Self {
+            code,
+            message,
+            http_code,
+        }
+    }
+
+    pub fn with_code(code: u16) -> Self {
+        Self::new(code, None, None)
+    }
+
+    pub fn with_message(code: u16, message: String) -> Self {
+        Self::new(code, Some(message), None)
+    }
+
+    pub fn with_http_code(code: u16, message: Option<String>, http_code: u16) -> Self {
+        Self::new(code, message, Some(http_code))
+    }
+
+    pub fn get_message(&self) -> &str {
+        &self.message
+    }
+
+    pub fn get_error_code(&self) -> u16 {
+        self.code
+    }
+
+    pub fn get_http_code(&self) -> u16 {
+        self.http_code.unwrap_or(400)
+    }
+
+    // Convenience constructors for common errors
+    pub fn internal_error(message: Option<String>) -> Self {
+        Self::with_http_code(1000, message, 500)
+    }
+
+    pub fn bad_request(message: Option<String>) -> Self {
+        Self::with_http_code(1001, message, 400)
+    }
+
+    pub fn not_found(message: Option<String>) -> Self {
+        Self::with_http_code(1002, message, 404)
+    }
+
+    pub fn unauthorized(message: Option<String>) -> Self {
+        Self::with_http_code(1003, message, 401)
+    }
+
+    pub fn validation_error(message: Option<String>) -> Self {
+        Self::with_http_code(1004, message, 422)
+    }
+
+    pub fn database_error(message: Option<String>) -> Self {
+        Self::with_http_code(1005, message, 500)
+    }
+}
+
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let message = match self {
-            AppError::InternalError(msg) => format!("Internal Error: {}", msg),
-            AppError::BadRequest(msg) => format!("Bad Request: {}", msg),
-            AppError::NotFound(msg) => format!("Not Found: {}", msg),
-            AppError::Unauthorized(msg) => format!("Unauthorized: {}", msg),
-            AppError::ValidationError(msg) => format!("Validation Error: {}", msg),
-            AppError::DatabaseError(msg) => format!("Database Error: {}", msg),
-            AppError::ServiceUnavailable => get_error_message(1102, "Service unavailable"),
-            AppError::ConfigurationError => get_error_message(1100, "Configuration error"),
-            AppError::ExternalServiceError => get_error_message(1101, "External service error"),
-            AppError::RateLimitExceeded => get_error_message(1111, "Rate limit exceeded"),
-            AppError::InvalidApiKey => get_error_message(1106, "Invalid API key"),
-            AppError::MaintenanceMode => get_error_message(1112, "Service maintenance mode"),
-            AppError::CustomError { message, .. } => message.clone(),
-        };
-        write!(f, "{}", message)
+        write!(f, "{}", self.message)
     }
 }
 
 impl ResponseError for AppError {
     fn status_code(&self) -> StatusCode {
-        match self {
-            AppError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            AppError::BadRequest(_) => StatusCode::BAD_REQUEST,
-            AppError::NotFound(_) => StatusCode::NOT_FOUND,
-            AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
-            AppError::ValidationError(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            AppError::DatabaseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            AppError::ServiceUnavailable => StatusCode::SERVICE_UNAVAILABLE,
-            AppError::ConfigurationError => StatusCode::INTERNAL_SERVER_ERROR,
-            AppError::ExternalServiceError => StatusCode::BAD_GATEWAY,
-            AppError::RateLimitExceeded => StatusCode::TOO_MANY_REQUESTS,
-            AppError::InvalidApiKey => StatusCode::UNAUTHORIZED,
-            AppError::MaintenanceMode => StatusCode::SERVICE_UNAVAILABLE,
-            AppError::CustomError { code, .. } => match *code {
-                1001 | 2001..=2099 => StatusCode::BAD_REQUEST,
-                1002 | 2100..=2199 => StatusCode::NOT_FOUND,
-                1003 | 2200..=2299 => StatusCode::UNAUTHORIZED,
-                1004 | 2300..=2399 => StatusCode::UNPROCESSABLE_ENTITY,
-                1111 | 2400..=2499 => StatusCode::TOO_MANY_REQUESTS,
-                _ => StatusCode::INTERNAL_SERVER_ERROR,
-            },
+        match self.get_http_code() {
+            400 => StatusCode::BAD_REQUEST,
+            401 => StatusCode::UNAUTHORIZED,
+            403 => StatusCode::FORBIDDEN,
+            404 => StatusCode::NOT_FOUND,
+            422 => StatusCode::UNPROCESSABLE_ENTITY,
+            429 => StatusCode::TOO_MANY_REQUESTS,
+            500 => StatusCode::INTERNAL_SERVER_ERROR,
+            502 => StatusCode::BAD_GATEWAY,
+            503 => StatusCode::SERVICE_UNAVAILABLE,
+            _ => StatusCode::BAD_REQUEST, // Default fallback
         }
     }
 
     fn error_response(&self) -> HttpResponse {
-        let (code, message) = match self {
-            AppError::InternalError(msg) => (1000, msg.clone()),
-            AppError::BadRequest(msg) => (1001, msg.clone()),
-            AppError::NotFound(msg) => (1002, msg.clone()),
-            AppError::Unauthorized(msg) => (1003, msg.clone()),
-            AppError::ValidationError(msg) => (1004, msg.clone()),
-            AppError::DatabaseError(msg) => (1005, msg.clone()),
-            AppError::ServiceUnavailable => (1102, get_error_message(1102, "Service unavailable")),
-            AppError::ConfigurationError => (1100, get_error_message(1100, "Configuration error")),
-            AppError::ExternalServiceError => {
-                (1101, get_error_message(1101, "External service error"))
-            }
-            AppError::RateLimitExceeded => (1111, get_error_message(1111, "Rate limit exceeded")),
-            AppError::InvalidApiKey => (1106, get_error_message(1106, "Invalid API key")),
-            AppError::MaintenanceMode => {
-                (1112, get_error_message(1112, "Service maintenance mode"))
-            }
-            AppError::CustomError { code, message } => (*code, message.clone()),
+        let error_response = ErrorResponse {
+            code: self.code,
+            message: self.message.clone(),
         };
-
-        let error_response = ErrorResponse { code, message };
         HttpResponse::build(self.status_code()).json(error_response)
     }
 }
 
-impl AppError {
-    pub fn service_error(code: u16) -> Self {
-        let message = get_error_message(code, &format!("Error code: {}", code));
-        AppError::CustomError { code, message }
-    }
-}
+
 
 pub type AppResult<T> = Result<T, AppError>;

@@ -1,4 +1,4 @@
-use rust_app_template::common::infrastructure;
+use rust_forge_boilerplate::common::infrastructure;
 use sqlx::migrate::MigrateDatabase;
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -6,7 +6,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().ok();
-    
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
             env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
