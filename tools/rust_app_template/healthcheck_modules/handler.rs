@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use crate::healthcheck_modules::{
-    dto::{HealthResponse, ReadinessResponse},
-    service::{HealthCheckService, HealthCheckServicesTrait},
+use crate::{
+    common::utils::error::AppError,
+    healthcheck_modules::{
+        dto::{HealthResponse, ReadinessResponse},
+        service::{HealthCheckService, HealthCheckServicesTrait},
+    },
 };
 use actix_web::{HttpResponse, web};
 use redis::aio::ConnectionManager;
@@ -42,6 +45,7 @@ pub async fn readiness_check(
     if ready {
         HttpResponse::Ok().json(response)
     } else {
-        HttpResponse::ServiceUnavailable().json(response)
+        let error = AppError::new(3000, None);
+        error.http_response_builder()
     }
 }

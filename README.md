@@ -15,10 +15,8 @@ A monorepos blueprint powered by [Nx](https://nx.dev) and [@monodon/rust](https:
 ### Installation
 
 ```bash
-# Install dependencies
 npm install
 
-# Verify Rust installation
 rustc --version
 cargo --version
 ```
@@ -41,49 +39,27 @@ cargo --version
 ### Building Projects
 
 ```bash
-# Build all projects
+#build all binary
 npx nx run-many -t build
 
-# Build specific project
+#build one binary
 npx nx build rust_forge_boilerplate
-npx nx build errors
-
-# Build with release optimizations
-npx nx build rust_forge_boilerplate --configuration=production
 ```
 
 ### Testing
 
 ```bash
-# Run all tests
+#all binary apps test
 npx nx run-many -t test
 
-# Test specific project
+#one binary applications test
 npx nx test rust_forge_boilerplate
-npx nx test errors
-
-# Run tests with coverage
-npx nx test rust_forge_boilerplate --configuration=production
-```
-
-### Linting
-
-```bash
-# Lint all projects
-npx nx run-many -t lint
-
-# Lint specific project
-npx nx lint rust_forge_boilerplate
 ```
 
 ### Running Applications
 
 ```bash
-# Run the main application
 npx nx run rust_forge_boilerplate
-
-# Run with release optimizations
-npx nx run rust_forge_boilerplate --configuration=production
 ```
 
 ## 📦 Creating New Projects
@@ -91,21 +67,13 @@ npx nx run rust_forge_boilerplate --configuration=production
 ### Generate a New Rust Library
 
 ```bash
-# Create a new library
 npx nx g @monodon/rust:lib my-new-lib
-
-# Create library with specific features
-npx nx g @monodon/rust:lib utils --directory=shared
 ```
 
 ### Generate a New Rust Application
 
 ```bash
-# Use the custom generator script
-npm run create:rust-app
-
-# Or use Nx generator directly
-npx nx g @monodon/rust:app my-new-app
+npm run create:rust-app {your_app_name}
 ```
 
 ## 🔧 Available Scripts
@@ -115,10 +83,8 @@ npx nx g @monodon/rust:app my-new-app
 ## 📊 Project Visualization
 
 ```bash
-# View project dependency graph
 npx nx graph
 
-# Show affected projects (useful for CI)
 npx nx affected:graph
 ```
 
@@ -128,31 +94,14 @@ Each Rust project supports these targets:
 
 - **build** - Compile the project
 - **test** - Run unit tests
-- **lint** - Run clippy linting
 - **run** - Execute the binary (for applications)
-
-### Configuration Options
-
-- **production** - Optimized release builds with `--release` flag
-
-## 🚀 Deployment
-
-Build outputs are generated in the `dist/target/` directory:
-
-```bash
-# Production builds
-npx nx build rust_forge_boilerplate --configuration=production
-
-# Outputs will be in: dist/target/rust_forge_boilerplate/release/
-```
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **Duplicate project names**: Ensure each project has a unique name in its `project.json`
-2. **Cargo.lock conflicts**: Run `cargo update` in the workspace root
-3. **Build cache issues**: Clear with `npx nx reset`
+1. **Cargo.lock conflicts**: Run `cargo update` in the workspace root
+2. **Build cache issues**: Clear with `npx nx reset`
 
 ### Useful Commands
 

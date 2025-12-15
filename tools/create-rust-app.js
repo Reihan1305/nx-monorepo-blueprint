@@ -79,7 +79,6 @@ function createRustApp(appName) {
   console.log(`🦀 Creating Rust app: ${appName}`);
 
   function applyReplacements(content) {
-    console.log("ini content: ", content);
     return content.replace(/rust_app_template/g, appName);
   }
 

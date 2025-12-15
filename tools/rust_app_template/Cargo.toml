@@ -6,7 +6,6 @@ default-run = "server"
 
 [lib]
 path = "lib.rs"
-
 [dependencies]
 home =  { workspace = true } 
 actix-web =  { workspace = true } 
